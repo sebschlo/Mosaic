@@ -5,15 +5,15 @@
 
 
 %% Load images to be stitched
-im1 = imread('21.jpg');
-im2 = imread('22.jpg');
+im1  = rgb2gray(im2double(imread('21.jpg')));
+im2  = rgb2gray(im2double(imread('22.jpg')));
 
 %% Corner Detection
 % subplot(1,3,1);
-imshow(uint8(im1));
+imshow(im1);
 title('Original Image');
 
-C = cornermetric(rgb2gray(im1));
+C = cornermetric(im1);
 % subplot(1,3,2);
 % imshow(C);
 title('Harris Corner Detection');
@@ -24,3 +24,8 @@ title('Harris Corner Detection');
 hold on
 scatter(x, y, 'ro');
 
+%% Extrac Feature Descriptors
+
+p = feat_desc(im1g, y, x);
+
+%% Descriptor Matching
