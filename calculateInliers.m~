@@ -1,0 +1,18 @@
+function [inlierAmtRow, X, Y] = calculateInliers(x1,y1,x2,y2, indexes)
+
+
+    % Calculate homography with those 4 points
+    H = est_homography(x1(randIdx), y1(randIdx), x2(randIdx), y2(randIdx));
+    
+    % Apply homography to all im1points to obtain allegged im2points X, Y
+    [X, Y] = apply_homography(H, x1, y1);
+    
+    % Compute SSD between alleged im2points X, Y and actual im2points x2,y2
+    % Store the amount of inliers found. Eliminate non-inliers from X and Y
+    % point arrays
+    inliers = sum(([x2 y2] - [X Y]).^2,2) < thresh;
+    X = X(inliers);
+    Y = Y(Inliers);
+    inlierAmtRow(1,1) = sum(inliers);    
+end
+

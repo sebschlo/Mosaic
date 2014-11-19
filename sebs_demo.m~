@@ -83,5 +83,6 @@ if plot
     title('RANSAC and feature match results');
     
     hold on
-    line(reshape([ranX1'; ranX2'],1,[]),reshape([ranY1'; ranY2'],1,[]));
+    line(reshape([ranX1'; ranX2'], size(ranX1,1), []), ...
+        reshape([ranY1'; ranY2'], size(ranY1,1), []));
 end

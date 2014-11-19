@@ -27,12 +27,14 @@ for i=1:n
     subSam = square(1:5:end,1:5:end);
     
     % Bias/Gain Normalize
-    subSam = double(subSam);
     subSam = subSam - mean2(subSam);
     subSam = subSam / std2(subSam);
     
     % Make into column vector and place in p
     p(:,i) = subSam(:);
 end
+
+% Get rid of discarded corners in final 
+p( :, ~any(p,1) ) = [];
 
 end

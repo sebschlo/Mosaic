@@ -17,7 +17,7 @@ for i=1:numLoops
     inlierAmt(i,2:5) = randIdx;
     
     % Calculate the number of inliers for the resulting homography
-    [numInliers, ~, ~, ~] = calculateInliers(x1, y1, x2, y2, indexes);
+    [numInliers, ~, ~] = calculateInliers(x1, y1, x2, y2, indexes);
     inlierAmt(i,1) = numInliers;
 end
 
@@ -27,10 +27,10 @@ goodPts = inlierAmt(I,2:5);
 
 % Recompute H for this set. This process is repeated to avoid saving the
 % actual set of inliers for however many numLoops there are.
-[~, X, Y, inlier_ind] = calculateInliers(x1, y1, x2, y2, goodPts); 
+[~, X, Y] = calculateInliers(x1, y1, x2, y2, goodPts); 
 
 % Now compute H with all of these inliers
-H = est_homography(x1(inlier_ind), y1(inlier_ind), X, Y);
+H = est_homography(
 
 end
 
