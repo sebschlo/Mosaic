@@ -35,6 +35,6 @@ for i=1:n
 end
 
 % Get rid of discarded corners in final 
-p( :, ~any(p,1) ) = [];
+% p( :, ~any(p,1) ) = [];
 
 end

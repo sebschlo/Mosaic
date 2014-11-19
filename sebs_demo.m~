@@ -4,14 +4,22 @@
 clear
 
 % Enables plotting of intermediate steps
-plot = 1;
+plot = [  1  ;   % Overall plotting
+          0  ;   % Initial corner detection and suppression steps
+          1  ;   % Feature matching results
+          1  ]'; % Ransac results
+      
+ransacThresh = 1;
+anmsPoints = 200;
 
 %% Load images to be stitched
 %  Place the desired picture names in here
-originalIm1 = imread('21.jpg');
-originalIm2 = imread('22.jpg');
+originalIm1 = imread('11.jpg');
+originalIm2 = imread('12.jpg');
 im1  = im2double(rgb2gray(originalIm1));
 im2  = im2double(rgb2gray(originalIm2));
+[h1, w1, ~] = size(originalIm1);
+[h2, w2, ~] = size(originalIm2);
 
 
 %% Corner Detection
@@ -24,8 +32,8 @@ C2 = cornermetric(im2);
 %% Adaptive Non-Maximum Suppression
 %  Uses corner values and applies non-maximum suppression to filter results
 %  into a more valuable set of corners.
-[y1, x1, rmax1] = anms(C1,100);
-[y2, x2, rmax2] = anms(C2,100);
+[y1, x1, rmax1] = anms(C1,anmsPoints);
+[y2, x2, rmax2] = anms(C2,anmsPoints);
 
 
 %% Extrac Feature Descriptors
@@ -36,53 +44,92 @@ p2 = feat_desc(im2, y2, x2);
 
 
 %% Descriptor Matching
-%  Match the corners from the p's. y1 and x1 remain the same, but the 
-%  second set of points needs to be reshuffled to match the indeces in m. 
+%  Run feature matching function
 m = feat_match( p1, p2 );
 
-n = size(x1,1);
-matchedX2 = zeros(n,1);
-matchedY2 = zeros(n,1);
-for i=1:n
-    matchedX2(i) = x2(m(i));
-    matchedY2(i) = y2(m(i));
+%  Reshuffle second set of points so that each index is a matched set of
+%  points determined by the m. 
+matchedX2 = -1*ones(anmsPoints,1);
+matchedY2 = -1*ones(anmsPoints,1);
+for i=1:anmsPoints
+    if m(i) >= 0
+        matchedX2(i) = x2(m(i));
+        matchedY2(i) = y2(m(i));
+    end
 end
 
+%  Eliminate outliers
+goodMatches = matchedX2 >= 0;
+ilx1 = x1(goodMatches);
+ilx2 = matchedX2(goodMatches);
+ily1 = y1(goodMatches);
+ily2 = matchedY2(goodMatches);
+
 %% RANSAC
-[H, inlier_ind] = ransac_est_homography(y1,x1,matchedY2,matchedX2,thresh);
-ranX1 = x1(inlier_ind);
-ranY1 = y1(inlier_ind);
-ranX2 = matchedX2(inlier_ind);
-ranY2 = matchedY2(inlier_ind);
+[H, inlier_ind] = ...
+    ransac_est_homography(ily1, ilx1, ily2, ilx2, ransacThresh);
+ranX1 = ilx1(inlier_ind);
+ranY1 = ily1(inlier_ind);
+ranX2 = ilx2(inlier_ind);
+ranY2 = ily2(inlier_ind);
 
 
 %% Plotting
 
-if plot
+if plot(1)
+    
     % Original Images and detected edges
-    subplot(2,2,1);
-    imshow(originalIm1);
-    hold on
-    scatter(x1, y1, 'ro');
-    title('Original Image 1');
+    if plot(2)
+        figure
+        
+        subplot(2,2,1);
+        imshow(C1);
+        hold on 
+        scatter(x1, y1, 'ro');
+        
+        subplot(2,2,3);
+        imshow(C2);
+        hold on
+        scatter(x2, y2, 'ro');
+        
+        
+        
+        subplot(2,2,3);
+        imshow(originalIm1);
+        hold on
+        scatter(x1, y1, 'ro');
+        title('Original Image 1');
+
+        subplot(2,2,6);
+        imshow(originalIm2);
+        hold on
+        scatter(x2, y2, 'ro');
+        title('Original Image 2');
+    end
     
-    subplot(2,2,2);
-    imshow(originalIm2);
-    hold on
-    scatter(x2, y2, 'ro');
-    title('Original Image 2');
-    
-    % Now plot the RANSAC and feat_match results
-    [h1, w1, ~] = size(originalIm1);
-    [h2, w2, ~] = size(originalIm2);
-    combinedImage = uint8(zeros(max(h1, h2), w1+w2, 3));
-    combinedImage(1:h1,1:w1,:) = originalIm1;
-    combinedImage(1:h2,w1+1:end,:) = originalIm2;
-    subplot(2,2,3:4);
-    imshow(combinedImage);
-    title('RANSAC and feature match results');
-    
-    hold on
-    line(reshape([ranX1'; ranX2'], size(ranX1,1), []), ...
-        reshape([ranY1'; ranY2'], size(ranY1,1), []));
+    % Plot the RANSAC and/or feat_match results
+    if plot(3) || plot(4)
+        figure
+        combinedImage = uint8(zeros(max(h1, h2), w1+w2, 3));
+        combinedImage(1:h1,1:w1,:) = originalIm1;
+        combinedImage(1:h2,w1+1:end,:) = originalIm2;
+        imshow(combinedImage);
+        title('RANSAC and feature match results');
+        hold on
+        scatter(x1, y1, 'ro');
+        scatter(x2+w1, y2, 'ro');
+        line([w1 w1],[1 size(combinedImage,1)],'Color','w','LineWidth',4); 
+        
+        % PLOT feat_match
+        if plot(3)
+            line([ilx1';(ilx2+w1)'],[ily1';ily2'],...
+                'Color','y','LineWidth', 2);
+        end
+        
+        % Plot RANSAC
+        if plot(4)
+            line([ranX1';(ranX2+w1)'],[ranY1';ranY2'],...
+                'Color','g','LineWidth',2);
+        end
+    end
 end

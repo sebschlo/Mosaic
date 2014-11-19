@@ -2,10 +2,10 @@ function [ m ] = feat_match( p1, p2 )
 %FEAT_MATCH Summary of this function goes here
 %   This function matches up descriptors from both images
 
-thresh = 1;
+thresh = .75;
 
-% Prepare output
-n = size(pi,2);
+% Prepare output objects
+n = size(p1,2);
 m = -1*ones(n,1);
 
 % Repeat arrays to calculate SSD
