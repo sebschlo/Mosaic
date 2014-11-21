@@ -14,8 +14,8 @@ anmsPoints = 200;
 
 %% Load images to be stitched
 %  Place the desired picture names in here
-originalIm1 = imread('lib3.jpg');
-originalIm2 = imread('lib5.jpg');
+originalIm1 = imread('21.jpg');
+originalIm2 = imread('22.jpg');
 im1  = im2double(rgb2gray(originalIm1));
 im2  = im2double(rgb2gray(originalIm2));
 [h1, w1, ~] = size(originalIm1);
@@ -82,23 +82,34 @@ if plot(1)
     if plot(2)
         figure
         
-        subplot(2,2,1);
-        imshow(imregionalmax(C1));
-
-        subplot(2,2,3);
-        imshow(imregionalmax(C2));
+        subplot(2,3,1);
+        imagesc(cornermetric(rgb2gray(originalIm1)))
+        title('Harris Corner Detection');
         
-        subplot(2,2,2);
+        subplot(2,3,4);
+        imagesc(cornermetric(rgb2gray(originalIm2)))
+        title('Harris Corner Detection');
+        
+        
+        subplot(2,3,2);
+        imshow(imregionalmax(C1));
+        title('NMS results');
+
+        subplot(2,3,5);
+        imshow(imregionalmax(C2));
+        title('NMS results');
+        
+        subplot(2,3,3);
         imshow(originalIm1);
         hold on
-        scatter(x1, y1, 'ro');
-        title('Original Image 1');
+        scatter(x1, y1, 'r+');
+        title('Final Detected Corners with ANMS');
 
-        subplot(2,2,4);
+        subplot(2,3,6);
         imshow(originalIm2);
         hold on
-        scatter(x2, y2, 'ro');
-        title('Original Image 2');
+        scatter(x2, y2, 'r+');
+        title('Final Detected Corners with ANMS');
     end
     
     % Plot the RANSAC and/or feat_match results
