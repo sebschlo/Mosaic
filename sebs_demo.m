@@ -14,8 +14,8 @@ anmsPoints = 200;
 
 %% Load images to be stitched
 %  Place the desired picture names in here
-originalIm1 = imread('11.jpg');
-originalIm2 = imread('12.jpg');
+originalIm1 = imread('lib3.jpg');
+originalIm2 = imread('lib5.jpg');
 im1  = im2double(rgb2gray(originalIm1));
 im2  = im2double(rgb2gray(originalIm2));
 [h1, w1, ~] = size(originalIm1);
@@ -36,7 +36,7 @@ C2 = cornermetric(im2);
 [y2, x2, rmax2] = anms(C2,anmsPoints);
 
 
-%% Extrac Feature Descriptors
+%% Extract Feature Descriptors
 %  the p arrays contain the feature descriptor associated to the corners 
 %  in the y and x arrays
 p1 = feat_desc(im1, y1, x1);
@@ -110,8 +110,8 @@ if plot(1)
         imshow(combinedImage);
         title('RANSAC and feature match results');
         hold on
-        scatter(x1, y1, 'ro');
-        scatter(x2+w1, y2, 'ro');
+        scatter(x1, y1, 'r*');
+        scatter(x2+w1, y2, 'r*');
         line([w1 w1],[1 size(combinedImage,1)],'Color','w','LineWidth',4); 
         
         % PLOT feat_match
